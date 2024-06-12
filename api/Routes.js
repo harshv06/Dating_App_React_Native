@@ -1,8 +1,10 @@
 const app = require("express");
 const crypto = require("crypto");
 const User = require("./models/user");
+const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+const jwt=require("jsonwebtoken")
 
 const router = app.Router();
 
@@ -34,27 +36,24 @@ const sendVerificationEmail = async (email, token) => {
 };
 
 router.post("/register", async (req, res) => {
+  const { name, email, password, verified } = req.body;
+  console.log(name,email,password,verified)
+  const hashedPass=await bcrypt.hash(password,10)
+  const user = new User({
+    name,
+    email,
+    password:hashedPass,
+    verified,
+  });
+
+
   try {
-    const { name, email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      console.log("User already exists");
-      return res.status(400).json({ message: "User already exist" });
-    }
-
-    const user = new User({
-      name,
-      email,
-      password,
-    });
-
-    user.verificationToken = crypto.randomBytes(20).toString("hex");
     await user.save();
-
-    sendVerificationEmail(user.email, user.verificationToken);
-  } catch (error) {
-    console.log("Error while registering");
-    res.status(500).json({ message: "Registration Failed" });
+    console.log("Registrartion Done")
+    return res.status(200).send({ message: "Registered" });
+  } catch (err) {
+    console.log("Error:",err)
+    return res.send(err);
   }
 });
 
@@ -73,12 +72,56 @@ router.post("/verify", async (req, res) => {
     let verificationCode = Math.floor(100000 + Math.random() * 900000);
     let user = [name, email, password, verificationCode];
     await sendVerificationEmail(email, verificationCode);
-    console.log(user)
+    console.log(user);
     return res.status(200).send({ message: "Mail Sent To User", data: user });
   } catch (err) {
     console.log("Failed to send mail:", err);
     return res.status(500).send({ error: "Failed to send mail" });
   }
 });
+
+const generateSecretKey=()=>{
+  const secretKey=crypto.randomBytes(32).toString("hex")
+  return secretKey
+}
+
+const secretKey=generateSecretKey()
+
+router.post("/login",async(req,res)=>{
+  const {email,password}=req.body
+  try{
+    const user=await User.findOne({email:email})
+    if(!user){
+      return res.status(400).send({error:"Invalid email or password"})
+    }
+
+    const isPasswordValid=await bcrypt.compare(password,user.password)
+
+    if(!isPasswordValid){
+      return res.status(400).send({error:"Invalid Password"})
+    }
+    const token=jwt.sign({userId:user._id},secretKey)
+    // console.log("here",token)
+    return res.status(200).json({token})
+  }catch(err){
+    console.log("Error while logging: ",err)
+    return res.status(500).send({error:"Failed to login please try again later"})
+  }
+})
+
+router.put("/users/:userID/gender",async(req,res)=>{
+  const {gender}=req.body
+  const {userID}=req.params
+
+  try{
+    const user=await User.findByIdAndUpdate(userID,{gender:gender},{new:true})
+    if(!user){
+      return res.status(500).send({error:"User not found by id"})
+    }
+    return res.status(200).send({message:"Gender updated"})
+  }catch(err){
+    return res.status(500).send({error:"Something went wrong"})
+  }
+})
 
 module.exports = router;

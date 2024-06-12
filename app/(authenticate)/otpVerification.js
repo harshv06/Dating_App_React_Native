@@ -27,7 +27,7 @@ const OtpVerification = () => {
     code: code,
   };
 
-  console.log(user);
+  console.log("User",user);
 
   const handleVerify = () => {
     setIsButtonClicked(true);
@@ -45,6 +45,7 @@ const OtpVerification = () => {
           password: user.password,
           verified: true,
         };
+        console.log("UserD: ",userD)
 
         fetch("http://192.168.0.105:3000/register", {
           method: "POST",
@@ -60,7 +61,7 @@ const OtpVerification = () => {
                 {
                   text: "Ok",
                   onPress: () => {
-                    router.replace("/register");
+                    router.replace("/login");
                   },
                 },
               ]);

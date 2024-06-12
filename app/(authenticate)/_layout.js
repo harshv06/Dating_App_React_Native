@@ -7,6 +7,7 @@ export default function Layout() {
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
         <Stack.Screen name="otpVerification" />
+        <Stack.Screen name="selectGender" />
       </Stack>
     </>
   );

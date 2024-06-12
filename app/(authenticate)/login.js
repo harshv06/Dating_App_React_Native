@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import {
   SafeAreaView,
@@ -14,12 +13,41 @@ import {
 } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const handleLogin = () => {
+    const user = {
+      email: email,
+      password: pass,
+    };
+
+    try {
+      fetch("http://192.168.0.105:3000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      })
+        .then((res) => res.json())
+        .then((response) => {
+          console.log(response.token);
+          const token = response.token;
+          AsyncStorage.setItem("auth", token);
+          setTimeout(() => {
+            router.push("/selectGender");
+          }, 2000);
+        });
+    } catch (err) {
+      console.log("Error:", err);
+    }
+  };
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -59,7 +87,12 @@ const Login = () => {
           />
 
           <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
-            <MaterialIcons style={styles.icon} name="email" size={24} color="white" />
+            <MaterialIcons
+              style={styles.icon}
+              name="email"
+              size={24}
+              color="white"
+            />
             <TextInput
               style={styles.input}
               placeholder="Enter Email"
@@ -70,7 +103,12 @@ const Login = () => {
           </Animated.View>
 
           <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
-            <AntDesign style={styles.icon} name="lock1" size={24} color="white" />
+            <AntDesign
+              style={styles.icon}
+              name="lock1"
+              size={24}
+              color="white"
+            />
             <TextInput
               style={styles.input}
               placeholder="Enter Password"
@@ -86,7 +124,7 @@ const Login = () => {
             <Text style={styles.forgotPasswordText}>Forgot Password</Text>
           </View>
 
-          <Pressable style={styles.loginButton}>
+          <Pressable style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.loginButtonText}>Login</Text>
           </Pressable>
 
@@ -224,4 +262,3 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
 });
-
