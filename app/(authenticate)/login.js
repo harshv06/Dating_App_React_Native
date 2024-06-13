@@ -14,6 +14,7 @@ import {
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -64,39 +65,32 @@ const Login = () => {
           <Animated.View style={[styles.logoContainer, { opacity: fadeAnim }]}>
             <Image
               style={styles.logo}
-              source={{
-                uri: "https://cdn-icons-png.flaticon.com/128/6655/6655045.png",
-              }}
+              source={require("../../assets/images/Logo.png")}
             />
-            <Text style={styles.title}>Match Mate</Text>
           </Animated.View>
         </View>
 
         <KeyboardAvoidingView style={styles.keyboardView}>
           <View style={styles.centeredView}>
             <Animated.Text style={[styles.loginText, { opacity: fadeAnim }]}>
-              Log in to your Account
+              Login
+            </Animated.Text>
+            <Animated.Text style={[styles.loginText2, { opacity: fadeAnim }]}>
+              Please enter your email & password to continue
             </Animated.Text>
           </View>
-
-          <Animated.Image
-            style={[styles.mainImage, { opacity: fadeAnim }]}
-            source={{
-              uri: "https://cdn-icons-png.flaticon.com/128/2509/2509078.png",
-            }}
-          />
 
           <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
             <MaterialIcons
               style={styles.icon}
               name="email"
               size={24}
-              color="white"
+              color="#FF84A7"
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Email"
-              placeholderTextColor="#ffffffa5"
+              placeholderTextColor="#FF84A7"
               value={email}
               onChangeText={(text) => setEmail(text)}
             />
@@ -107,32 +101,82 @@ const Login = () => {
               style={styles.icon}
               name="lock1"
               size={24}
-              color="white"
+              color="#FF84A7"
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Password"
-              placeholderTextColor="#ffffffa5"
+              placeholderTextColor="#FF84A7"
               value={pass}
               onChangeText={(text) => setPass(text)}
               secureTextEntry={true}
             />
           </Animated.View>
 
-          <View style={styles.optionsContainer}>
+          <Animated.View
+            style={[styles.optionsContainer, { opacity: fadeAnim }]}
+          >
             <Text style={styles.optionText}>Keep Me Logged In</Text>
             <Text style={styles.forgotPasswordText}>Forgot Password</Text>
-          </View>
+          </Animated.View>
 
-          <Pressable style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Login</Text>
-          </Pressable>
+          <Animated.View style={{ opacity: fadeAnim }}>
+            <LinearGradient
+              style={styles.loginButton}
+              colors={["#FF84A7", "#E03368"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Pressable onPress={handleLogin}>
+                <Text style={styles.loginButtonText}>Login</Text>
+              </Pressable>
+            </LinearGradient>
+          </Animated.View>
 
-          <Pressable onPress={() => router.replace("/register")}>
-            <Text style={styles.registerText}>
-              Don't have an account? Sign Up
-            </Text>
-          </Pressable>
+          <Animated.View style={{ opacity: fadeAnim }}>
+            <Pressable
+              onPress={() => router.replace("/register")}
+              style={{ flexDirection: "row", justifyContent: "center" }}
+            >
+              <Text style={styles.registerText}>Dont't have an account?</Text>
+              <Text style={[styles.registerText, { color: "#E03368" }]}>
+                {" "}
+                Signup
+              </Text>
+            </Pressable>
+          </Animated.View>
+
+          <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
+            <View style={styles.lines}></View>
+            <Text style={{ color: "black" }}>Or Signup with</Text>
+            <View style={styles.lines}></View>
+          </Animated.View>
+
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 20,
+              opacity: fadeAnim,
+            }}
+          >
+            <Pressable style={styles.buttons}>
+              <Image
+                source={require("../../assets/images/google.png")}
+                style={{ width: 50, height: 50 }}
+              />
+              <Text style={styles.buttonText}>Google</Text>
+            </Pressable>
+            <Pressable style={styles.buttons}>
+              <Image
+                source={require("../../assets/images/fb.png")}
+                style={{ width: 30, height: 30, marginLeft: 5 }}
+              />
+              <Text style={[styles.buttonText, { marginLeft: 12 }]}>
+                Facebook
+              </Text>
+            </Pressable>
+          </Animated.View>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </ScrollView>
@@ -150,8 +194,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    height: 250,
-    backgroundColor: "#F9629F",
+    height: 200,
+    backgroundColor: "white",
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
@@ -161,39 +205,32 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 150,
-    height: 80,
+    width: 120,
+    height: 120,
     resizeMode: "contain",
-  },
-  title: {
-    marginTop: 20,
-    textAlign: "center",
-    fontSize: 24,
-    fontWeight: "600",
-    color: "white",
   },
   keyboardView: {
     width: "85%",
   },
   centeredView: {
-    alignItems: "center",
+    alignItems: "",
   },
   loginText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 25,
+    fontSize: 30,
+    fontWeight: "600",
+    marginTop: 20,
     color: "#333",
   },
-  mainImage: {
-    width: 100,
-    height: 80,
-    resizeMode: "cover",
-    alignSelf: "center",
-    marginTop: 20,
+  loginText2: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginTop: 12,
+    color: "gray",
   },
+
   inputContainer: {
-    backgroundColor: "#FFC0CB",
-    paddingVertical: 10,
+    backgroundColor: "white",
+    paddingVertical: 8,
     flexDirection: "row",
     borderRadius: 10,
     marginTop: 30,
@@ -206,12 +243,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    borderWidth: 0.5,
+    borderColor: "#E03368",
   },
   icon: {
     marginLeft: 10,
   },
   input: {
-    color: "white",
+    color: "black",
     marginVertical: 10,
     marginHorizontal: 10,
     width: 280,
@@ -260,5 +299,33 @@ const styles = StyleSheet.create({
     color: "gray",
     fontSize: 16,
     marginTop: 10,
+  },
+
+  footer: {
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+  },
+
+  lines: {
+    backgroundColor: "gray",
+    width: "30%",
+    height: 1,
+    margin: 10,
+  },
+  buttons: {
+    borderColor: "gray",
+    borderWidth: 0.5,
+    width: "49%",
+    borderRadius: 10,
+    padding: 5,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  buttonText: {
+    fontSize: 17,
+    fontWeight: "300",
   },
 });
