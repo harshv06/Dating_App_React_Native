@@ -17,12 +17,13 @@ import { useRouter } from "expo-router";
 import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import Modal from "react-native-modal";
+import { LinearGradient } from "expo-linear-gradient";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
-  const [isModalVisible,setModalVisible]=useState(false)
+  const [isModalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -41,7 +42,7 @@ const Register = () => {
       password: pass,
     };
 
-    setModalVisible(true)
+    setModalVisible(true);
     // Your registration logic here
     fetch("http://192.168.0.105:3000/verify", {
       method: "POST",
@@ -54,7 +55,7 @@ const Register = () => {
       .then((response) => {
         console.log(response); // Check the response data
         if (response.message) {
-          setModalVisible(false)
+          setModalVisible(false);
           Alert.alert("Success", "Verification code sent to email id", [
             {
               text: "Ok",
@@ -85,39 +86,25 @@ const Register = () => {
           <Animated.View style={[styles.logoContainer, { opacity: fadeAnim }]}>
             <Image
               style={styles.logo}
-              source={{
-                uri: "https://cdn-icons-png.flaticon.com/128/6655/6655045.png",
-              }}
+              source={require("../../assets/images/Logo.png")}
             />
-            <Text style={styles.title}>Match Mate</Text>
+            <Text style={styles.title}>Signup to Continue</Text>
+            <Text style={styles.titleText}>Please login to continue</Text>
           </Animated.View>
         </View>
 
         <KeyboardAvoidingView style={styles.keyboardView}>
-          <View style={styles.centeredView}>
-            <Animated.Text style={[styles.registerText, { opacity: fadeAnim }]}>
-              Register to your Account
-            </Animated.Text>
-          </View>
-
-          <Animated.Image
-            style={[styles.mainImage, { opacity: fadeAnim }]}
-            source={{
-              uri: "https://cdn-icons-png.flaticon.com/128/2509/2509078.png",
-            }}
-          />
-
           <Animated.View style={[styles.inputContainer, { opacity: fadeAnim }]}>
             <Ionicons
               style={styles.icon}
               name="person-sharp"
               size={24}
-              color="white"
+              color="#FF84A7"
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Name"
-              placeholderTextColor="#ffffffa5"
+              placeholderTextColor="#FF84A7"
               value={name}
               onChangeText={(text) => setName(text)}
             />
@@ -128,21 +115,30 @@ const Register = () => {
               style={styles.icon}
               name="email"
               size={24}
-              color="white"
+              color="#FF84A7"
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Email"
-              placeholderTextColor="#ffffffa5"
+              placeholderTextColor="#FF84A7"
               value={email}
               onChangeText={(text) => setEmail(text)}
             />
           </Animated.View>
 
           <Modal isVisible={isModalVisible}>
-            <View style={{ height:'20%',justifyContent:'center',alignItems:'center',backgroundColor:'white' }}>
-            <ActivityIndicator size="small" color="#F9629F" />
-              <Text style={{marginTop:20,fontWeight:'700'}}>Please Wait Email Is Being Sent</Text>
+            <View
+              style={{
+                height: "20%",
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "white",
+              }}
+            >
+              <ActivityIndicator size="small" color="#F9629F" />
+              <Text style={{ marginTop: 20, fontWeight: "700" }}>
+                Please Wait Email Is Being Sent
+              </Text>
             </View>
           </Modal>
 
@@ -151,27 +147,84 @@ const Register = () => {
               style={styles.icon}
               name="lock1"
               size={24}
-              color="white"
+              color="#FF84A7"
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Password"
-              placeholderTextColor="#ffffffa5"
+              placeholderTextColor="#FF84A7"
               value={pass}
               onChangeText={(text) => setPass(text)}
               secureTextEntry={true}
             />
           </Animated.View>
 
-          <Pressable onPress={handleRegister} style={styles.registerButton}>
-            <Text style={styles.registerButtonText}>Register</Text>
-          </Pressable>
+          <Animated.View style={{ opacity: fadeAnim }}>
+            <LinearGradient
+              colors={["#FF84A7", "#E03368"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.registerButton}
+            >
+              <Pressable onPress={handleRegister}>
+                <Text style={styles.registerButtonText}>Register</Text>
+              </Pressable>
+            </LinearGradient>
+          </Animated.View>
 
-          <Pressable onPress={() => router.replace("/login")}>
-            <Text style={styles.loginText}>
-              Already have an account? Log In
-            </Text>
-          </Pressable>
+          <Animated.View style={{ opacity: fadeAnim }}>
+            <Pressable
+              onPress={() => router.replace("/login")}
+              style={{ flexDirection: "row", justifyContent: "center" }}
+            >
+              <Text style={styles.loginText}>Already have an account?</Text>
+              <Text style={[styles.loginText, { color: "#E03368" }]}>
+                {" "}
+                Log in
+              </Text>
+            </Pressable>
+          </Animated.View>
+
+          <Animated.View style={[styles.footer,{opacity:fadeAnim}]}>
+            <View style={styles.lines}></View>
+            <Text style={{ color: "black" }}>Or Signup with</Text>
+            <View style={styles.lines}></View>
+          </Animated.View>
+
+          <Animated.View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginTop: 10,
+              opacity:fadeAnim
+            }}
+          >
+            <Pressable style={styles.buttons}>
+              <Image
+                source={require("../../assets/images/google.png")}
+                style={{ width: 50, height: 50 }}
+              />
+              <Text style={styles.buttonText}>Google</Text>
+            </Pressable>
+            <Pressable style={styles.buttons}>
+              <Image
+                source={require("../../assets/images/fb.png")}
+                style={{ width: 30, height: 30, marginLeft: 5 }}
+              />
+              <Text style={[styles.buttonText, { marginLeft: 12 }]}>
+                Facebook
+              </Text>
+            </Pressable>
+          </Animated.View>
+
+          <Animated.View style={{ alignItems: "center", marginTop: 15,opacity:fadeAnim }}>
+            <Text>I accept all the</Text>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={{ color: "#E03368" }}>Terms & Conditions </Text>
+              <Text>&</Text>
+              <Text style={{ color: "#E03368" }}> Privacy Policy</Text>
+            </View>
+          </Animated.View>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </ScrollView>
@@ -181,6 +234,13 @@ const Register = () => {
 export default Register;
 
 const styles = StyleSheet.create({
+  linearGradient: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   scrollView: {
     flex: 1,
     backgroundColor: "white",
@@ -190,7 +250,7 @@ const styles = StyleSheet.create({
   },
   header: {
     height: 250,
-    backgroundColor: "#F9629F",
+    backgroundColor: "white",
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
@@ -200,16 +260,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 150,
-    height: 80,
+    width: 120,
+    height: 120,
     resizeMode: "contain",
   },
   title: {
     marginTop: 20,
     textAlign: "center",
-    fontSize: 24,
-    fontWeight: "600",
-    color: "white",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "black",
+  },
+  titleText: {
+    marginTop: 10,
+    textAlign: "center",
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#989394",
   },
   keyboardView: {
     width: "85%",
@@ -223,16 +290,10 @@ const styles = StyleSheet.create({
     marginTop: 25,
     color: "#333",
   },
-  mainImage: {
-    width: 100,
-    height: 80,
-    resizeMode: "cover",
-    alignSelf: "center",
-    marginTop: 20,
-  },
+
   inputContainer: {
-    backgroundColor: "#FFC0CB",
-    paddingVertical: 10,
+    backgroundColor: "white",
+    paddingVertical: 8,
     flexDirection: "row",
     borderRadius: 10,
     marginTop: 20,
@@ -242,6 +303,8 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
+    borderColor: "#E03368",
+    borderWidth: 0.5,
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
@@ -250,7 +313,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   input: {
-    color: "white",
+    color: "black",
     marginVertical: 10,
     marginHorizontal: 10,
     width: 280,
@@ -264,7 +327,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     alignItems: "center",
     borderRadius: 10,
-    width: "65%",
+    width: "100%",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -276,7 +339,7 @@ const styles = StyleSheet.create({
   },
   registerButtonText: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "400",
     color: "white",
   },
   loginText: {
@@ -284,5 +347,33 @@ const styles = StyleSheet.create({
     color: "gray",
     fontSize: 16,
     marginTop: 10,
+  },
+
+  footer: {
+    marginTop: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "center",
+  },
+
+  lines: {
+    backgroundColor: "gray",
+    width: "30%",
+    height: 1,
+    margin: 10,
+  },
+  buttons: {
+    borderColor: "gray",
+    borderWidth: 0.5,
+    width: "49%",
+    borderRadius: 10,
+    padding: 5,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  buttonText: {
+    fontSize: 17,
+    fontWeight: "300",
   },
 });
