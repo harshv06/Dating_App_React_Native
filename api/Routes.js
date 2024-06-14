@@ -1,12 +1,25 @@
 const app = require("express");
 const crypto = require("crypto");
 const User = require("./models/user");
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
+const path = require("path");
+const multer = require("multer");
 require("dotenv").config();
-const jwt=require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 
 const router = app.Router();
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const sendVerificationEmail = async (email, token) => {
   const transporter = nodemailer.createTransport({
@@ -37,22 +50,21 @@ const sendVerificationEmail = async (email, token) => {
 
 router.post("/register", async (req, res) => {
   const { name, email, password, verified } = req.body;
-  console.log(name,email,password,verified)
-  const hashedPass=await bcrypt.hash(password,10)
+  console.log(name, email, password, verified);
+  const hashedPass = await bcrypt.hash(password, 10);
   const user = new User({
     name,
     email,
-    password:hashedPass,
+    password: hashedPass,
     verified,
   });
 
-
   try {
     await user.save();
-    console.log("Registrartion Done")
+    console.log("Registrartion Done");
     return res.status(200).send({ message: "Registered" });
   } catch (err) {
-    console.log("Error:",err)
+    console.log("Error:", err);
     return res.send(err);
   }
 });
@@ -80,48 +92,81 @@ router.post("/verify", async (req, res) => {
   }
 });
 
-const generateSecretKey=()=>{
-  const secretKey=crypto.randomBytes(32).toString("hex")
-  return secretKey
-}
+const generateSecretKey = () => {
+  const secretKey = crypto.randomBytes(32).toString("hex");
+  return secretKey;
+};
 
-const secretKey=generateSecretKey()
+const secretKey = generateSecretKey();
 
-router.post("/login",async(req,res)=>{
-  const {email,password}=req.body
-  try{
-    const user=await User.findOne({email:email})
-    if(!user){
-      return res.status(400).send({error:"Invalid email or password"})
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(400).send({ error: "Invalid email or password" });
     }
 
-    const isPasswordValid=await bcrypt.compare(password,user.password)
+    const isPasswordValid = await bcrypt.compare(password, user.password);
 
-    if(!isPasswordValid){
-      return res.status(400).send({error:"Invalid Password"})
+    if (!isPasswordValid) {
+      return res.status(400).send({ error: "Invalid Password" });
     }
-    const token=jwt.sign({userId:user._id},secretKey)
+    const token = jwt.sign({ userId: user._id }, secretKey);
     // console.log("here",token)
-    return res.status(200).json({token})
-  }catch(err){
-    console.log("Error while logging: ",err)
-    return res.status(500).send({error:"Failed to login please try again later"})
+    return res.status(200).json({ token });
+  } catch (err) {
+    console.log("Error while logging: ", err);
+    return res
+      .status(500)
+      .send({ error: "Failed to login please try again later" });
   }
-})
+});
 
-router.put("/users/:userID/gender",async(req,res)=>{
-  const {gender}=req.body
-  const {userID}=req.params
+router.put("/users/:userID/gender", async (req, res) => {
+  console.log("heelo");
+  const { gender } = req.body;
+  const { userID } = req.params;
 
-  try{
-    const user=await User.findByIdAndUpdate(userID,{gender:gender},{new:true})
-    if(!user){
-      return res.status(500).send({error:"User not found by id"})
+  try {
+    const user = await User.findByIdAndUpdate(
+      userID,
+      { gender: gender },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(500).send({ error: "User not found by id" });
     }
-    return res.status(200).send({message:"Gender updated"})
-  }catch(err){
-    return res.status(500).send({error:"Something went wrong"})
+    return res.status(200).send({ message: "Gender updated" });
+  } catch (err) {
+    return res.status(500).send({ error: "Something went wrong" });
   }
-})
+});
+
+router.post(
+  "/users/profileData",
+  upload.single("profilePic"),
+  async (req, res) => {
+    try {
+      const { name, date, number, address } = req.body;
+      const profilePic = req.file ? req.file.path : null;
+      console.log(name,date,number,address,profilePic)
+      const user = new User({
+        name,
+        dob,
+        mobileNumber,
+        address,
+        profileImages,
+      });
+
+      await user.save();
+      return res
+        .status(200)
+        .json({ message: "Profile uploaded successfully!" });
+    } catch (err) {
+      res.status(500).json({ error: "Error uploading profile" });
+    }
+  }
+);
 
 module.exports = router;

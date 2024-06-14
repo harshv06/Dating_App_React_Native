@@ -23,6 +23,16 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  dob: {
+    type: String,
+  },
+  address: {
+    type: String,
+  },
+  mobileNumber: {
+    type: String,
+    unique: true,
+  },
   crushes: [
     {
       type: mongoose.Schema.Types.ObjectId,
