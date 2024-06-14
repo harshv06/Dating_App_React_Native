@@ -10,17 +10,22 @@ import {
   ScrollView,
   Pressable,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
+import Modal from "react-native-modal";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [isButtonClicked, setIsButtonClicked] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isVerificationComplete, setIsVerificationComplete] = useState(false);
 
   const handleLogin = () => {
     const user = {
@@ -28,7 +33,12 @@ const Login = () => {
       password: pass,
     };
 
+    if (!email || !pass) {
+      return;
+    }
+
     try {
+      setModalVisible(true);
       fetch("http://192.168.0.105:3000/login", {
         method: "POST",
         headers: {
@@ -41,11 +51,13 @@ const Login = () => {
           console.log(response.token);
           const token = response.token;
           AsyncStorage.setItem("auth", token);
+          setModalVisible(false);
           setTimeout(() => {
             router.push("/selectGender");
           }, 2000);
         });
     } catch (err) {
+      setModalVisible(false);
       console.log("Error:", err);
     }
   };
@@ -145,6 +157,24 @@ const Login = () => {
               </Text>
             </Pressable>
           </Animated.View>
+
+          <Modal isVisible={isModalVisible}>
+            <View
+              style={{
+                backgroundColor: "gray",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "15%",
+                width: "80%",
+                alignSelf: "center",
+              }}
+            >
+              <ActivityIndicator size="small" color="pink" />
+              <Text style={{ margin: 10, fontSize: 16, fontWeight: "600" }}>
+                Please wait
+              </Text>
+            </View>
+          </Modal>
 
           <Animated.View style={[styles.footer, { opacity: fadeAnim }]}>
             <View style={styles.lines}></View>
@@ -274,10 +304,9 @@ const styles = StyleSheet.create({
   loginButton: {
     alignSelf: "center",
     marginTop: 30,
-    backgroundColor: "#F9629F",
-    paddingVertical: 15,
-    paddingHorizontal: 30,
+    height: 55,
     alignItems: "center",
+    justifyContent: "center",
     borderRadius: 10,
     width: "65%",
     shadowColor: "#000",
@@ -293,6 +322,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     color: "white",
+    paddingHorizontal: 80,
+    paddingVertical: 20,
   },
   registerText: {
     textAlign: "center",
@@ -327,5 +358,19 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 17,
     fontWeight: "300",
+  },
+
+  verifyButton: {
+    height: 50,
+    borderRadius: 10,
+    alignSelf: "center",
+    width: "90%",
+    justifyContent: "center",
+  },
+  verifyButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
+    textAlign: "center",
   },
 });

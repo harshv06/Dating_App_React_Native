@@ -1,5 +1,6 @@
 import {
-    Alert,
+  Alert,
+  Animated,
   Image,
   Pressable,
   SafeAreaView,
@@ -7,137 +8,160 @@ import {
   Text,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "core-js/stable/atob";
 import { jwtDecode } from "jwt-decode";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+import { Foundation } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
-const selectGender = () => {
+const SelectGender = () => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const { email } = useLocalSearchParams();
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = await AsyncStorage.getItem("auth");
-      const decodedToken = jwtDecode(token);
-      const userID = decodedToken.userId;
-      setUserID(userID);
-    };
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, [fadeAnim]);
 
-    fetchUser();
-  }, []);
-
-  const updateGender=async()=>{
-
-    try{
-        fetch(`http://192.168.0.105:3000/users/${userID}/gender`,{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify(option)
-        }).then((res)=>res.json()).then((response)=>{
-            if(response.message){
-                router.replace("/(tabs)/bio")
-            }
-        })
-    }catch(err){
-        console.log("Error: ",err)
+  const updateGender = async () => {
+    try {
+      fetch(`http://192.168.0.105:3000/users/gender`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ gender: option, email: email }),
+      })
+        .then((res) => res.json())
+        .then((response) => {
+          if (response.message) {
+            router.replace("/(tabs)/bio");
+          }
+        });
+    } catch (err) {
+      console.log("Error: ", err);
     }
-  }
+  };
+
   const [userID, setUserID] = useState("");
   const [option, setOption] = useState("");
+
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={{ margin: 20 }}>
-        <Pressable
-          onPress={() => setOption("male")}
-          style={{
-            flexDirection: "row",
-            backgroundColor: "#F0F0F0",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: 12,
-            marginTop: 25,
-            borderRadius: 5,
-            borderColor: option == "male" ? "#D0D0D0" : "transparent",
-            borderWidth: option == "male" ? 1 : 0,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "500" }}>I am a Man</Text>
-          <Image
-            style={{ width: 50, height: 50 }}
-            source={{
-              uri: "https://cdn-icons-png.flaticon.com/128/12442/12442425.png",
-            }}
-          />
-        </Pressable>
-        <Pressable
-          onPress={() => setOption("female")}
-          style={{
-            flexDirection: "row",
-            backgroundColor: "#F0F0F0",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: 12,
-            marginTop: 25,
-            borderRadius: 5,
-            borderColor: option == "female" ? "#D0D0D0" : "transparent",
-            borderWidth: option == "female" ? 1 : 0,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "500" }}>I am a Woman</Text>
-          <Image
-            style={{ width: 50, height: 50 }}
-            source={{
-              uri: "https://cdn-icons-png.flaticon.com/128/9844/9844179.png",
-            }}
-          />
-        </Pressable>
-        <Pressable
-          onPress={() => setOption("non-binary")}
-          style={{
-            flexDirection: "row",
-            backgroundColor: "#F0F0F0",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: 12,
-            marginTop: 25,
-            borderRadius: 5,
-            borderColor: option == "non-binary" ? "#D0D0D0" : "transparent",
-            borderWidth: option == "non-binary" ? 1 : 0,
-          }}
-        >
-          <Text style={{ fontSize: 16, fontWeight: "500" }}>
-            I am a Non-Binary
-          </Text>
-          <Image
-            style={{ width: 50, height: 50 }}
-            source={{
-              uri: "https://cdn-icons-png.flaticon.com/128/12442/12442425.png",
-            }}
-          />
-        </Pressable>
-
-        {option && (
-          <Pressable
-          onPress={updateGender}
+      <Animated.View style={{ margin: 20, opacity: fadeAnim }}>
+        <View>
+          <Text style={{ fontSize: 28, fontWeight: "500" }}>Select Gender</Text>
+          <Text
             style={{
-              backgroundColor: "black",
-              marginTop: 25,
-              padding: 12,
-              borderRadius: 4,
-              alignItems: "center",
+              fontSize: 14,
+              marginTop: 5,
+              color: "gray",
+              fontWeight: "400",
             }}
           >
-            <Text style={{ fontSize: 16, fontWeight: "600", color: "white" }}>
-              Done
-            </Text>
+            Please select your gender
+          </Text>
+        </View>
+
+        <View style={{ alignItems: "center", marginTop: 50 }}>
+          <Pressable
+            style={[
+              styles.buttons,
+              option === "male" && styles.selectedButton,
+              option === "male" && styles.selectedButtonSize,
+            ]}
+            onPress={() => setOption("male")}
+          >
+            <Foundation
+              name="male-symbol"
+              size={60}
+              color={option === "male" ? "#E03368" : "black"}
+            />
+            <Text style={styles.text}>Male</Text>
+          </Pressable>
+          <Pressable
+            style={[
+              styles.buttons,
+              { marginTop: 50 },
+              option === "female" && styles.selectedButton,
+              option === "female" && styles.selectedButtonSize,
+            ]}
+            onPress={() => setOption("female")}
+          >
+            <Foundation
+              name="female-symbol"
+              size={60}
+              color={option === "female" ? "#E03368" : "black"}
+            />
+            <Text style={styles.text}>Female</Text>
+          </Pressable>
+        </View>
+
+        {option && (
+          <Pressable onPress={updateGender}>
+            <LinearGradient
+              colors={["#FF84A7", "#E03368"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.gradientButton}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "600",
+                  color: "white",
+                }}
+              >
+                Done
+              </Text>
+            </LinearGradient>
           </Pressable>
         )}
-      </View>
+      </Animated.View>
     </View>
   );
 };
 
-export default selectGender;
+export default SelectGender;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  buttons: {
+    borderWidth: 0.5,
+    borderColor: "gray",
+    marginTop: 20,
+    width: "55%",
+    height: "37%",
+    borderRadius: 15,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5, // For Android shadow
+    shadowColor: "#000", // For iOS shadow
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
+  },
+  selectedButton: {
+    borderColor: "#FF84A7",
+    backgroundColor: "#fae3ea",
+    borderWidth: 1,
+  },
+  selectedButtonSize: {
+    transform: [{ scale: 1.1 }],
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginTop: 10,
+  },
+  gradientButton: {
+    backgroundColor: "black",
+    padding: 15,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+});

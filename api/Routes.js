@@ -123,21 +123,18 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.put("/users/:userID/gender", async (req, res) => {
-  console.log("heelo");
-  const { gender } = req.body;
-  const { userID } = req.params;
+router.put("/users/gender", async (req, res) => {
+  const { gender,email } = req.body;
 
   try {
-    const user = await User.findByIdAndUpdate(
-      userID,
-      { gender: gender },
-      { new: true }
-    );
-    if (!user) {
-      return res.status(500).send({ error: "User not found by id" });
+    const user=await User.findOne({email:email})
+    if(!user){
+      res.status(500).json({error:"Something went wrong"})
     }
-    return res.status(200).send({ message: "Gender updated" });
+
+    user.gender=gender
+    await user.save()
+    res.status(200).json({message:"Success"})
   } catch (err) {
     return res.status(500).send({ error: "Something went wrong" });
   }
@@ -148,22 +145,28 @@ router.post(
   upload.single("profilePic"),
   async (req, res) => {
     try {
-      const { name, date, number, address } = req.body;
+      const { name, date, number, address, email } = req.body;
       const profilePic = req.file ? req.file.path : null;
-      console.log(name,date,number,address,profilePic)
-      const user = new User({
-        name,
-        dob,
-        mobileNumber,
-        address,
-        profileImages,
-      });
+      const existUser = await User.findOne({ email: email });
+      // console.log(existUser)
+      if (!existUser) {
+        console.log("Something went wrong")
+        res.status(500).send({ error: "Something went wrong" });
+      }
 
-      await user.save();
+      existUser.name = name;
+      existUser.mobileNumber = number;
+      existUser.address = address;
+      existUser.dob = date;
+      existUser.profileImages = profilePic;
+
+      await existUser.save();
+      console.log("Done")
       return res
         .status(200)
         .json({ message: "Profile uploaded successfully!" });
     } catch (err) {
+      console.log(err)
       res.status(500).json({ error: "Error uploading profile" });
     }
   }

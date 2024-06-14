@@ -70,8 +70,11 @@ const Register = () => {
             },
           ]);
         }
+        setModalVisible(false)
+        // Alert.alert("Failed",response.error)
       })
       .catch((err) => {
+        setModalVisible(false)
         console.log("Erro", err);
       });
   };
