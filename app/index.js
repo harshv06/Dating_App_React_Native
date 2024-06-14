@@ -4,7 +4,7 @@ import { Redirect } from 'expo-router'
 
 const index = () => {
   return (
-    <Redirect href="/(authenticate)/otpVerification"/>
+    <Redirect href="/(authenticate)/login"/>
   )
 }
 

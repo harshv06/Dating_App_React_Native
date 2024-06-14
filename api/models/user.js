@@ -75,6 +75,11 @@ const userSchema = new mongoose.Schema({
       type: String,
     },
   ],
+
+  profileGenerated:{
+    type:Boolean,
+    default:false
+  }
 });
 
 const User = mongoose.model("User", userSchema);

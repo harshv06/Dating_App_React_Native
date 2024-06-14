@@ -44,6 +44,7 @@ const OtpVerification = () => {
     }
     return () => clearTimeout(timer);
   }, [counter, isCounting]);
+  
   const { name, email, password, code } = useLocalSearchParams();
   const user = {
     name: name,
@@ -84,7 +85,7 @@ const OtpVerification = () => {
                 {
                   text: "Ok",
                   onPress: () => {
-                    router.replace("/login");
+                    router.push(`/profileDetails/?username=${name}&useremail=${email}`);
                   },
                 },
               ]);
@@ -155,8 +156,7 @@ const OtpVerification = () => {
           {counter === 0 ? (
             <Pressable
               onPress={() => {
-                setCounter(30);
-                setIsCounting(true);
+                handleResendOtp()
               }}
             >
               <Text style={{ color: "#E03368", fontWeight: "600" }}>
