@@ -112,9 +112,10 @@ router.post("/login", async (req, res) => {
     if (!isPasswordValid) {
       return res.status(400).send({ error: "Invalid Password" });
     }
+
+    const profile=user.profileGenerated
     const token = jwt.sign({ userId: user._id }, secretKey);
-    // console.log("here",token)
-    return res.status(200).json({ token });
+    return res.status(200).json({ token:token,profileGenerated:profile });
   } catch (err) {
     console.log("Error while logging: ", err);
     return res
@@ -124,17 +125,17 @@ router.post("/login", async (req, res) => {
 });
 
 router.put("/users/gender", async (req, res) => {
-  const { gender,email } = req.body;
+  const { gender, email } = req.body;
 
   try {
-    const user=await User.findOne({email:email})
-    if(!user){
-      res.status(500).json({error:"Something went wrong"})
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      res.status(500).json({ error: "Something went wrong" });
     }
 
-    user.gender=gender
-    await user.save()
-    res.status(200).json({message:"Success"})
+    user.gender = gender;
+    await user.save();
+    res.status(200).json({ message: "Success" });
   } catch (err) {
     return res.status(500).send({ error: "Something went wrong" });
   }
@@ -150,7 +151,7 @@ router.post(
       const existUser = await User.findOne({ email: email });
       // console.log(existUser)
       if (!existUser) {
-        console.log("Something went wrong")
+        console.log("Something went wrong");
         res.status(500).send({ error: "Something went wrong" });
       }
 
@@ -161,15 +162,36 @@ router.post(
       existUser.profileImages = profilePic;
 
       await existUser.save();
-      console.log("Done")
+      console.log("Done");
       return res
         .status(200)
         .json({ message: "Profile uploaded successfully!" });
     } catch (err) {
-      console.log(err)
+      console.log(err);
       res.status(500).json({ error: "Error uploading profile" });
     }
   }
 );
+
+router.post("/uploadInterests", async (req, res) => {
+  const userinterests = req.body;
+  const email = req.query.email;
+
+  try {
+    const updatedUser = await User.findOneAndUpdate(
+      { email: email },
+      { $set: { interests: userinterests, profileGenerated: true } },
+      { new: true, upsert: true }
+    );
+
+    if (!updatedUser) {
+      res.status(500).json({ error: "User not found" });
+    } else {
+      res.status(200).json({ message: "success" });
+    }
+  } catch (err) {
+    console.log("Error: ", err);
+  }
+});
 
 module.exports = router;

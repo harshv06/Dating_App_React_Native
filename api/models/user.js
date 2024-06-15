@@ -79,6 +79,10 @@ const userSchema = new mongoose.Schema({
   profileGenerated:{
     type:Boolean,
     default:false
+  },
+
+  interests:{
+    type:[String]
   }
 });
 

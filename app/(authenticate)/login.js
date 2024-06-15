@@ -23,9 +23,23 @@ const Login = () => {
   const [pass, setPass] = useState("");
   const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [isButtonClicked, setIsButtonClicked] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
-  const [isVerificationComplete, setIsVerificationComplete] = useState(false);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("auth");
+        const profile = await AsyncStorage.getItem("profile");
+        if (token && profile) {
+          router.push("/(tabs)/bio");
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    checkLoginStatus()
+  }, []);
 
   const handleLogin = () => {
     const user = {
@@ -48,13 +62,23 @@ const Login = () => {
       })
         .then((res) => res.json())
         .then((response) => {
-          console.log(response.token);
-          const token = response.token;
-          AsyncStorage.setItem("auth", token);
-          setModalVisible(false);
-          setTimeout(() => {
-            router.push("/selectGender");
-          }, 2000);
+          if (response.token && response.profileGenerated) {
+            const token = response.token;
+            AsyncStorage.setItem("auth", token);
+            AsyncStorage.setItem("profile", true);
+            setModalVisible(false);
+            setTimeout(() => {
+              router.push("/(tabs)/bio");
+            }, 2000);
+          } else {
+            const token = response.token;
+            AsyncStorage.setItem("auth", token);
+            AsyncStorage.setItem("profile", false);
+            setModalVisible(false);
+            setTimeout(() => {
+              router.push("/(authenticate)/profileDetails");
+            }, 2000);
+          }
         });
     } catch (err) {
       setModalVisible(false);

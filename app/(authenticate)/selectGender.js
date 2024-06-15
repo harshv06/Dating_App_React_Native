@@ -40,7 +40,7 @@ const SelectGender = () => {
         .then((res) => res.json())
         .then((response) => {
           if (response.message) {
-            router.replace("/(tabs)/bio");
+            router.replace(`/selectInrests/?email=${email}`);
           }
         });
     } catch (err) {
