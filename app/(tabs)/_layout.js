@@ -5,7 +5,21 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default function Layout() {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          position: "absolute",
+          height: 70,
+          bottom: -20,
+          borderTopWidth: 0.5,
+          borderTopColor: "black",
+        },
+        tabBarLabelStyle: { position: "absolute", fontSize: 10, bottom: -15 },
+        tabBarIconStyle: { position: "static" },
+        tabBarActiveTintColor: "#FF84A7",
+        tabBarInactiveTintColor: "black",
+      }}
+    >
       <Tabs.Screen
         name="profile"
         options={{
@@ -13,30 +27,32 @@ export default function Layout() {
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
-              <Feather name="eye" size={24} color="black" />
+              <Feather name="eye" size={24} color="#FF84A7" />
             ) : (
-              <Feather name="eye" size={24} color="gray" />
+              <Feather name="eye" size={24} color="black" />
             ),
+
+          tabBarLabel: "Profile",
         }}
       />
 
       <Tabs.Screen
         name="chats"
         options={{
-          title: "Chat",
+          title: "Chats",
           headerShown: false,
           tabBarIcon: ({ focused }) =>
             focused ? (
               <Ionicons
                 name="chatbubble-ellipses-outline"
                 size={24}
-                color="black"
+                color="#FF84A7"
               />
             ) : (
               <Ionicons
                 name="chatbubble-ellipses-outline"
                 size={24}
-                color="gray"
+                color="black"
               />
             ),
         }}
@@ -52,13 +68,13 @@ export default function Layout() {
               <MaterialCommunityIcons
                 name="guy-fawkes-mask"
                 size={24}
-                color="black"
+                color="#FF84A7"
               />
             ) : (
               <MaterialCommunityIcons
                 name="guy-fawkes-mask"
                 size={24}
-                color="gray"
+                color="black"
               />
             ),
         }}

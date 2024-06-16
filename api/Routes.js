@@ -113,9 +113,9 @@ router.post("/login", async (req, res) => {
       return res.status(400).send({ error: "Invalid Password" });
     }
 
-    const profile=user.profileGenerated
+    const profile = user.profileGenerated;
     const token = jwt.sign({ userId: user._id }, secretKey);
-    return res.status(200).json({ token:token,profileGenerated:profile });
+    return res.status(200).json({ token: token, profileGenerated: profile });
   } catch (err) {
     console.log("Error while logging: ", err);
     return res
@@ -146,7 +146,7 @@ router.post(
   upload.single("profilePic"),
   async (req, res) => {
     try {
-      const { name, date, number, address, email } = req.body;
+      const { name, date, number, address, email, age } = req.body;
       const profilePic = req.file ? req.file.path : null;
       const existUser = await User.findOne({ email: email });
       // console.log(existUser)
@@ -160,6 +160,7 @@ router.post(
       existUser.address = address;
       existUser.dob = date;
       existUser.profileImages = profilePic;
+      existUser.age = age;
 
       await existUser.save();
       console.log("Done");
@@ -191,6 +192,89 @@ router.post("/uploadInterests", async (req, res) => {
     }
   } catch (err) {
     console.log("Error: ", err);
+  }
+});
+
+router.post("/fetchProfiles", async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    res.status(500).json({ error: "No user found" });
+  }
+  const userinterests = user.interests;
+  const likedProfiles=user.Likes
+  const dislikedProfiles=user.Dislikes
+  const pendingLikes=user.pendingLikes
+
+  const matchingUser = await User.find({
+    email: { $ne: email },
+    interests: { $in: userinterests },
+    // _id:{$nin:[...likedProfiles,...dislikedProfiles,...pendingLikes]}
+  });
+
+  const profiles = matchingUser.map(
+    ({ name, profileImages, interests, _id, age }) => ({
+      name,
+      profileImages,
+      interests,
+      _id,
+      age,
+    })
+  );
+  console.log(profiles);
+  res.status(200).json({ message: "done", profile: profiles });
+});
+
+router.post("/saveFcmToken", async (req, res) => {
+  const { email, fcmToken } = req.body;
+
+  try {
+    await User.updateOne({ email }, { fcmToken });
+    res.status(200).json({ message: "FCM token saved successfully" });
+  } catch (error) {
+    console.error("Error saving FCM token:", error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+router.post("/handleLike", async (req, res) => {
+  const { id, email } = req.body;
+  const user = await User.findOne({ email: email });
+  const user2=await User.findById({_id:id})
+  if (!user && !user2) {
+    res.status(500).json({ error: "Something went wrong" });
+  } else {
+    try {
+      if (!user.Likes.includes(id) && !user2.pendingLikes.includes(user._id)) {
+        // user.Likes.push(id);
+        user2.pendingLikes.push(user._id)
+        console.log(user2);
+        await user.save();
+        await user2.save()
+        res.status(200).json({ message: "Done" });
+      }
+    } catch (err) {
+      console.log("Error:", err);
+    }
+  }
+});
+
+router.post("/handledislike", async (req, res) => {
+  const { id, email } = req.body;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    res.status(500).json({ error: "Something went wrong" });
+  } else {
+    try {
+      if (!user.Likes.includes(id)) {
+        user.Dislikes.push(id);
+        console.log(user)
+        await user.save();
+        res.status(200).json({ message: "Done" });
+      }
+    } catch (err) {
+      console.log("Error:", err);
+    }
   }
 });
 

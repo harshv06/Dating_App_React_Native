@@ -83,6 +83,24 @@ const userSchema = new mongoose.Schema({
 
   interests:{
     type:[String]
+  },
+
+  Likes:{
+    type:[mongoose.Schema.Types.ObjectId]
+  },
+
+  Dislikes:{
+    type:[mongoose.Schema.Types.ObjectId]
+  },
+
+  pendingLikes:{
+    type:[mongoose.Schema.Types.ObjectId]
+  },
+
+  fcmToken: String, // Add this field to store FCM token
+
+  age:{
+    type:Number
   }
 });
 
