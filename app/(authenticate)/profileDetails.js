@@ -26,6 +26,7 @@ const profileDetails = () => {
   const [email, setEmail] = useState("harshvonmail@gmail.com");
   const [number, setNumber] = useState("");
   const [date, setDate] = useState("");
+  const [date2, setDate2] = useState("");
   const [address, setAddress] = useState("");
   const router = useRouter();
 
@@ -52,17 +53,26 @@ const profileDetails = () => {
     }
 
     const formData = new FormData();
-    console.log(profilePic);
     formData.append("profilePic", {
       uri: profilePic,
       type: "image/jpeg",
       name: "Profile.jpg",
     });
+    const today = new Date();
+    let age = today.getFullYear() - date2.getFullYear();
+    const monthDifference = today.getMonth() - date2.getMonth();
+    if (
+      monthDifference < 0 ||
+      (monthDifference === 0 && today.getDate() < date2.getDate())
+    ) {
+      age--;
+    }
     formData.append("name", name);
     formData.append("date", date);
     formData.append("number", number);
     formData.append("address", address);
     formData.append("email", useremail);
+    formData.append("age", age);
 
     try {
       const response = await fetch(
@@ -98,6 +108,7 @@ const profileDetails = () => {
 
   const handleConfirm = (date) => {
     const fDate = date.toLocaleDateString();
+    setDate2(date);
     setDate(fDate);
     setisVisible(false);
   };

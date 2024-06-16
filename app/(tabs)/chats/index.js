@@ -1,7 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View,Animated } from 'react-native'
+import React, { useRef } from 'react'
+
 
 const index = () => {
+  const fadeAnim=useRef(new Animated.Value(0)).current
+
+
   return (
     <View>
       <Text>index</Text>

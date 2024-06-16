@@ -93,6 +93,12 @@ const userSchema = new mongoose.Schema({
     type:[mongoose.Schema.Types.ObjectId]
   },
 
+  pendingLikes:{
+    type:[mongoose.Schema.Types.ObjectId]
+  },
+
+  fcmToken: String, // Add this field to store FCM token
+
   age:{
     type:Number
   }
