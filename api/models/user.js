@@ -83,6 +83,18 @@ const userSchema = new mongoose.Schema({
 
   interests:{
     type:[String]
+  },
+
+  Likes:{
+    type:[mongoose.Schema.Types.ObjectId]
+  },
+
+  Dislikes:{
+    type:[mongoose.Schema.Types.ObjectId]
+  },
+
+  age:{
+    type:Number
   }
 });
 

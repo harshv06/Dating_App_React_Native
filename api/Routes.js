@@ -113,9 +113,9 @@ router.post("/login", async (req, res) => {
       return res.status(400).send({ error: "Invalid Password" });
     }
 
-    const profile=user.profileGenerated
+    const profile = user.profileGenerated;
     const token = jwt.sign({ userId: user._id }, secretKey);
-    return res.status(200).json({ token:token,profileGenerated:profile });
+    return res.status(200).json({ token: token, profileGenerated: profile });
   } catch (err) {
     console.log("Error while logging: ", err);
     return res
@@ -146,7 +146,7 @@ router.post(
   upload.single("profilePic"),
   async (req, res) => {
     try {
-      const { name, date, number, address, email } = req.body;
+      const { name, date, number, address, email, age } = req.body;
       const profilePic = req.file ? req.file.path : null;
       const existUser = await User.findOne({ email: email });
       // console.log(existUser)
@@ -160,6 +160,7 @@ router.post(
       existUser.address = address;
       existUser.dob = date;
       existUser.profileImages = profilePic;
+      existUser.age = age;
 
       await existUser.save();
       console.log("Done");
@@ -191,6 +192,53 @@ router.post("/uploadInterests", async (req, res) => {
     }
   } catch (err) {
     console.log("Error: ", err);
+  }
+});
+
+router.post("/fetchProfiles", async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    res.status(500).json({ error: "No user found" });
+  }
+  const userinterests = user.interests;
+  const likedProfiles=user.Likes
+
+  const matchingUser = await User.find({
+    email: { $ne: email },
+    interests: { $in: userinterests },
+    // _id:{$nin:likedProfiles}
+  });
+
+  const profiles = matchingUser.map(
+    ({ name, profileImages, interests, _id, age }) => ({
+      name,
+      profileImages,
+      interests,
+      _id,
+      age,
+    })
+  );
+  console.log(profiles);
+  res.status(200).json({ message: "done", profile: profiles });
+});
+
+router.post("/handleLike", async (req, res) => {
+  const { id, email } = req.body;
+  const user = await User.findOne({ email: email });
+  if (!user) {
+    res.status(500).json({ error: "Something went wrong" });
+  } else {
+    try {
+      if (!user.Likes.includes(id)) {
+        user.Likes.push(id);
+        console.log(user.Likes);
+        await user.save();
+        res.status(200).json({ message: "Done" });
+      }
+    } catch (err) {
+      console.log("Error:", err);
+    }
   }
 });
 
