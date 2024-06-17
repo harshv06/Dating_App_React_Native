@@ -33,26 +33,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
-  crushes: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
 
-  receivedLike: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
+  matches: {
+    type:[mongoose.Schema.Types.ObjectId]
+  },
 
-  matches: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  ],
 
   profileImages: [
     {

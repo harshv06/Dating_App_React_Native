@@ -7,6 +7,7 @@ const path = require("path");
 const multer = require("multer");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const { default: mongoose } = require("mongoose");
 
 const router = app.Router();
 
@@ -202,9 +203,9 @@ router.post("/fetchProfiles", async (req, res) => {
     res.status(500).json({ error: "No user found" });
   }
   const userinterests = user.interests;
-  const likedProfiles=user.Likes
-  const dislikedProfiles=user.Dislikes
-  const pendingLikes=user.pendingLikes
+  const likedProfiles = user.Likes;
+  const dislikedProfiles = user.Dislikes;
+  const pendingLikes = user.pendingLikes;
 
   const matchingUser = await User.find({
     email: { $ne: email },
@@ -240,17 +241,17 @@ router.post("/saveFcmToken", async (req, res) => {
 router.post("/handleLike", async (req, res) => {
   const { id, email } = req.body;
   const user = await User.findOne({ email: email });
-  const user2=await User.findById({_id:id})
+  const user2 = await User.findById({ _id: id });
   if (!user && !user2) {
     res.status(500).json({ error: "Something went wrong" });
   } else {
     try {
       if (!user.Likes.includes(id) && !user2.pendingLikes.includes(user._id)) {
         // user.Likes.push(id);
-        user2.pendingLikes.push(user._id)
+        user2.pendingLikes.push(user._id);
         console.log(user2);
         await user.save();
-        await user2.save()
+        await user2.save();
         res.status(200).json({ message: "Done" });
       }
     } catch (err) {
@@ -268,7 +269,7 @@ router.post("/handledislike", async (req, res) => {
     try {
       if (!user.Likes.includes(id)) {
         user.Dislikes.push(id);
-        console.log(user)
+        console.log(user);
         await user.save();
         res.status(200).json({ message: "Done" });
       }
@@ -278,4 +279,44 @@ router.post("/handledislike", async (req, res) => {
   }
 });
 
+router.post("/fetchLikes", async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email: email });
+  // const pendingLikes=user.pendingLikes.map((id)=>id.toString())
+  const pendingLikes = user.pendingLikes;
+  console.log(pendingLikes);
+  res.status(200).send({ pendingLikes });
+});
+
+router.post("/fetchLikedProfilesInfo", async (req, res) => {
+  const { id } = req.body;
+  console.log(id);
+  try {
+    const objectId = id.map((item) => new mongoose.Types.ObjectId(item));
+    const profiles = await User.find({ _id: { $in: objectId } });
+    res.status(200).json({ profile: profiles, message: "Ok" });
+  } catch (error) {
+    console.log("error: ", error);
+    res.status(500).send("Error fetching profiles");
+  }
+});
+
+router.post("/createMatch", async (req, res) => {
+  const { id } = req.body;
+//   const objID = id.map((item) => new mongoose.Types.ObjectId(item));
+const objID=new mongoose.Types.ObjectId(id[0]);
+  console.log(objID);
+  try {
+    const user= await User.findOneAndUpdate({pendingLikes:objID},{$pull:{pendingLikes:objID},$addToSet:{matches:objID}},{new:true})
+    console.log(user)
+    if (!user) {
+        console.log("user not found")
+        return res.status(404).json({ message: "User not found or no pending likes" });
+    }
+    await user.save();
+    res.status(200).json({ message: "Matched" });
+  } catch (err) {
+    console.log("Error:", err);
+  }
+});
 module.exports = router;
