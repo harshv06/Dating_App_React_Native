@@ -2,6 +2,7 @@ import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Platform } from "react-native";
 
 export default function Layout() {
   return (
@@ -10,12 +11,19 @@ export default function Layout() {
         tabBarStyle: {
           position: "absolute",
           height: 70,
-          bottom: -20,
+          bottom: Platform.OS == "ios" ? -20 : 0,
           borderTopWidth: 0.5,
           borderTopColor: "black",
         },
-        tabBarLabelStyle: { position: "absolute", fontSize: 10, bottom: -15 },
-        tabBarIconStyle: { position: "static" },
+        tabBarLabelStyle: {
+          position: "absolute",
+          fontSize: 10,
+          bottom: Platform.OS == "ios" ? -15 : 8,
+        },
+        tabBarIconStyle: {
+          position: "static",
+          top: Platform.OS == "ios" ? 0 : -10,
+        },
         tabBarActiveTintColor: "#FF84A7",
         tabBarInactiveTintColor: "black",
       }}

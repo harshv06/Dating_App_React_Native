@@ -4,6 +4,7 @@ export default function Layout(){
     return(
         <>
         <Stack screenOptions={{headerShown:false}}>
+            <Stack.Screen name='profileInfo'/>
             <Stack.Screen name='index'/>
         </Stack>
         </>
