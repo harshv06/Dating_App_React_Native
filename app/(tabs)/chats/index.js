@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Image } from "react-native-expo-image-cache";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Index = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -29,6 +30,7 @@ const Index = () => {
 
   useEffect(() => {
     if (pendingLikes.length > 0) {
+      console.log("Pending Likes: ", pendingLikes);
       fetchLikedProfileInfo(pendingLikes);
     }
   }, [pendingLikes]);
@@ -54,54 +56,72 @@ const Index = () => {
           ),
         }));
         setProfiles(updatedProfiles);
+        console.log(updatedProfiles);
       }
     }
   };
 
-  useEffect(() => {
-    const fetchLikes = async () => {
-      try {
-        const response = await fetch("http://192.168.0.105:3000/fetchLikes", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: email }),
-        });
-        const result = await response.json();
-        setPendingLikes(result.pendingLikes);
-      } catch (err) {
-        console.log(err);
-      }
-    };
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchLikes = async () => {
+        try {
+          const response = await fetch("http://192.168.0.105:3000/fetchLikes", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: email }),
+          });
+          const result = await response.json();
+          if (result.pendingLikes.length==0) {
+            console.log("No profiles to show");
+            setProfiles(null)
+          } else {
+            setPendingLikes(result.pendingLikes);
+            console.log(result.pendingLikes.length);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
 
-    fetchLikes();
-  }, []);
+      fetchLikes();
+      console.log("Done");
+    }, [])
+  );
 
   const renderCards = () => {
-    return profiles.map((profile, index) => (
-      <Pressable
-        key={index}
-        style={styles.card}
-        onPress={() => {
-          router.push("/(tabs)/chats/profileInfo");
-        }}
-      >
-        <Image
-          uri={`http://192.168.0.105:3000/${profile.profileImages[0]}`}
-          style={styles.image}
-          resizeMode="contain"
-          placeholderContent={
-            <ActivityIndicator size="small" color="#0000ff" />
-          }
-        />
-        <View style={styles.pressable}>
-          <Text style={styles.cardText}>{profile.name}</Text>
-          <Text style={styles.cardText2}>Message</Text>
-        </View>
-      </Pressable>
-    ));
+    if (profiles.length > 0) {
+      return profiles.map((profile, index) => (
+        <Pressable
+          key={index}
+          style={styles.card}
+          onPress={() => {
+            console.log(profile._id);
+            router.push(
+              `/(tabs)/chats/profileInfo/?id=${encodeURIComponent(profile._id)}`
+            );
+          }}
+        >
+          <Image
+            uri={`http://192.168.0.105:3000/${profile.profileImages[0]}`}
+            style={styles.image}
+            resizeMode="contain"
+            placeholderContent={
+              <ActivityIndicator size="small" color="#0000ff" />
+            }
+          />
+          <View style={styles.pressable}>
+            <Text style={styles.cardText}>{profile.name}</Text>
+            <Text style={styles.cardText2}>Message</Text>
+          </View>
+        </Pressable>
+      ));
+    } else {
+      return <Text>No profiles found</Text>;
+    }
   };
+  
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
@@ -180,7 +200,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     height: 100,
     marginHorizontal: 15,
-    backgroundColor: "red",
   },
   cardText: {
     fontSize: 20,

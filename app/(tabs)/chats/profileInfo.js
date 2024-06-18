@@ -10,81 +10,62 @@ import {
 import { AntDesign } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { Image } from "react-native-expo-image-cache";
+import { useLocalSearchParams } from "expo-router";
 
 const ProfileInfo = () => {
   const email = "vishwakarmaharsh45@gmail.com";
-  const id = ["666d60e4a41666565a990f03"];
+  const { id } = useLocalSearchParams();
   const [profiles, setProfiles] = useState([]);
 
   useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const response = await fetch(
-          "http://192.168.0.105:3000/fetchLikedProfilesInfo",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id: id }),
+    if (id) {
+      const parseId = id
+      const fetchDetails = async () => {
+        try {
+          const response = await fetch(
+            "http://192.168.0.105:3000/fetchLikedProfilesInfo",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ id: [parseId] }),
+            }
+          );
+
+          const result = await response.json();
+          if (result.profile) {
+            const updatedProfiles = result.profile.map((profile) => ({
+              ...profile,
+              profileImages: profile.profileImages.map((path) =>
+                path.replace(/\\/g, "/")
+              ),
+            }));
+            setProfiles(updatedProfiles);
           }
-        );
-
-        const result = await response.json();
-        console.log(result.profile);
-        if (result.profile) {
-          const updatedProfiles = result.profile.map((profile) => ({
-            ...profile,
-            profileImages: profile.profileImages.map((path) =>
-              path.replace(/\\/g, "/")
-            ),
-          }));
-          setProfiles(updatedProfiles);
+        } catch (err) {
+          console.log("Error:", err);
         }
-        console.log("Profiles:", profiles);
-      } catch (err) {
-        console.log("Error:", err);
-      }
-    };
-    fetchDetails();
-  }, []);
-
-  const data = [
-    {
-      name: "Movies",
-    },
-    {
-      name: "Movies",
-    },
-    {
-      name: "Movies",
-    },
-    {
-      name: "Movies",
-    },
-    {
-      name: "Movies",
-    },
-    {
-      name: "Movies",
-    },
-  ];
-
-  const handleLike=async()=>{
-    try{
-        const response=await fetch("http://192.168.0.105:3000/createMatch",{
-            method:"POST",
-            headers:{
-                'Content-Type':'application/json'
-            },
-            body:JSON.stringify({id:id})
-        })
-        const result=await response.json()
-        console.log(result)
-    }catch(err){
-        console.log("Error: ",err)
+      };
+      fetchDetails();
     }
-  }
+  }, [id]);
+
+  const handleLike = async () => {
+    try {
+      const response = await fetch("http://192.168.0.105:3000/createMatch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: [id] }),
+      });
+      const result = await response.json();
+      console.log(result);
+    } catch (err) {
+      console.log("Error: ", err);
+    }
+  };
 
   const renderBoxes = () => {
     return profiles.map((profile, index) => (
@@ -112,7 +93,6 @@ const ProfileInfo = () => {
           ) : (
             <Text>No Image Available</Text>
           )}
-          {/* <View style={styles.image}></View> */}
 
           <View style={styles.iconsContainer}>
             <Pressable style={styles.circle}>
@@ -123,7 +103,10 @@ const ProfileInfo = () => {
                 style={styles.icons}
               />
             </Pressable>
-            <Pressable style={[styles.circle, { width: 70, height: 70 }]} onPress={handleLike}>
+            <Pressable
+              style={[styles.circle, { width: 70, height: 70 }]}
+              onPress={handleLike}
+            >
               <AntDesign
                 name="heart"
                 size={26}
@@ -191,7 +174,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 50,
     borderBottomLeftRadius: 50,
   },
-
   circle: {
     backgroundColor: "white",
     borderRadius: 50,
@@ -205,7 +187,6 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
   },
-
   iconsContainer: {
     position: "absolute",
     bottom: -30,

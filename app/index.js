@@ -6,7 +6,7 @@ import { Redirect } from 'expo-router'
 
 const index = () => {
   return (
-    <Redirect href="/(tabs)/chats/profileInfo"/>
+    <Redirect href="/(tabs)/chats"/>
   )
 }
 
