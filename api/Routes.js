@@ -127,11 +127,11 @@ router.post("/login", async (req, res) => {
 
 router.put("/users/gender", async (req, res) => {
   const { gender, email } = req.body;
-
+  console.log(req.body)
   try {
     const user = await User.findOne({ email: email });
     if (!user) {
-      res.status(500).json({ error: "Something went wrong" });
+      return res.status(500).json({ error: "Something went wrong" });
     }
 
     user.gender = gender;
@@ -147,13 +147,14 @@ router.post(
   upload.single("profilePic"),
   async (req, res) => {
     try {
-      const { name, date, number, address, email, age } = req.body;
+      const { name, date, number, address, email, age,occupation,bio } = req.body;
       const profilePic = req.file ? req.file.path : null;
       const existUser = await User.findOne({ email: email });
       // console.log(existUser)
       if (!existUser) {
         console.log("Something went wrong");
         res.status(500).send({ error: "Something went wrong" });
+        return
       }
 
       existUser.name = name;
@@ -162,12 +163,14 @@ router.post(
       existUser.dob = date;
       existUser.profileImages = profilePic;
       existUser.age = age;
+      existUser.occupation=occupation
+      existUser.bio=bio
 
       await existUser.save();
       console.log("Done");
       return res
         .status(200)
-        .json({ message: "Profile uploaded successfully!" });
+        .json({ message: "Profile uploaded successfully!",data:existUser.profileImages });
     } catch (err) {
       console.log(err);
       res.status(500).json({ error: "Error uploading profile" });
@@ -224,18 +227,6 @@ router.post("/fetchProfiles", async (req, res) => {
   );
   console.log(profiles);
   res.status(200).json({ message: "done", profile: profiles });
-});
-
-router.post("/saveFcmToken", async (req, res) => {
-  const { email, fcmToken } = req.body;
-
-  try {
-    await User.updateOne({ email }, { fcmToken });
-    res.status(200).json({ message: "FCM token saved successfully" });
-  } catch (error) {
-    console.error("Error saving FCM token:", error);
-    res.status(500).json({ error: "Something went wrong" });
-  }
 });
 
 router.post("/handleLike", async (req, res) => {
@@ -319,4 +310,18 @@ const objID=new mongoose.Types.ObjectId(id[0]);
     console.log("Error:", err);
   }
 });
+
+router.post("/fetchMessageList",async(req,res)=>{
+  const email='harshvonmail@gmail.com'
+  try{
+    const user=await User.find({email:email})
+    if(user){
+      console.log(user)
+      const matches=user[0].matches
+      res.status(200).json({list:matches})
+    }
+  }catch(err){
+    console.log("Error : ",err)
+  }
+})
 module.exports = router;

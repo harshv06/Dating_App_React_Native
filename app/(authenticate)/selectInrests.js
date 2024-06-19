@@ -10,10 +10,19 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const selectInrests = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [email,setEmail]=useState("")
 
   useEffect(() => {
+    const fetchData=async()=>{
+      const mail=await AsyncStorage.getItem("email")
+      if(mail){
+        setEmail(mail)
+      }
+    }
+    fetchData()
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
@@ -21,7 +30,6 @@ const selectInrests = () => {
     }).start();
   }, [fadeAnim]);
 
-  const { email } = useLocalSearchParams();
   const router=useRouter()
 
   const interestsData = [
@@ -113,6 +121,7 @@ const selectInrests = () => {
 
     const result = await response.json();
     if (result.message) {
+      AsyncStorage.setItem("profile","true")
       Alert.alert("Success","Details Uploaded",[
         {
             text:"ok",

@@ -17,17 +17,20 @@ import { AntDesign } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const profileDetails = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const [profilePic, setProfilePic] = useState(null);
   const [isVisible, setisVisible] = useState(false);
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("harshvonmail@gmail.com");
+  const [email,setEmail]=useState("")
   const [number, setNumber] = useState("");
   const [date, setDate] = useState("");
   const [date2, setDate2] = useState("");
   const [address, setAddress] = useState("");
+  const [occupation,setOccupation]=useState("")
+  const [bio,setBio]=useState("")
   const router = useRouter();
 
   const pickImage = async () => {
@@ -71,8 +74,10 @@ const profileDetails = () => {
     formData.append("date", date);
     formData.append("number", number);
     formData.append("address", address);
-    formData.append("email", useremail);
+    formData.append("email", email);
     formData.append("age", age);
+    formData.append("occupation", occupation);
+    formData.append("bio", bio);
 
     try {
       const response = await fetch(
@@ -87,14 +92,21 @@ const profileDetails = () => {
       );
 
       const result = await response.json();
-      console.log("Result:", result);
-      console.log("Response:", response);
+      console.log("Result:", result.data);
       if (result.message) {
+        AsyncStorage.setItem("name",name)
+        AsyncStorage.setItem("email",email)
+        AsyncStorage.setItem("date",date)
+        AsyncStorage.setItem("number",number)
+        AsyncStorage.setItem("occupation",occupation)
+        AsyncStorage.setItem("bio",bio)
+        AsyncStorage.setItem("address",address)
+        AsyncStorage.setItem("url",result.data)
         Alert.alert("Success", "Profile updated successfully!", [
           {
             text: "Ok",
             onPress: () => {
-              router.replace(`/selectGender/?email=${email}`);
+              router.replace(`/selectGender`);
             },
           },
         ]);
@@ -112,16 +124,21 @@ const profileDetails = () => {
     setDate(fDate);
     setisVisible(false);
   };
-
-  useEffect(() => {
+  
+  useEffect(()=>{
+    const fetchEmail=async()=>{
+      const mail=await AsyncStorage.getItem("email")
+      if(mail){
+        setEmail(mail)
+      }
+    }
+    fetchEmail()
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
       useNativeDriver: true,
     }).start();
-  }, [fadeAnim]);
-
-  const { username, useremail } = useLocalSearchParams();
+  },[fadeAnim])
 
   return (
     <ScrollView
@@ -188,8 +205,31 @@ const profileDetails = () => {
               <TextInput
                 keyboardType="email-address"
                 style={[styles.textIp, { marginLeft: -10 }]}
-                value={useremail}
+                value={email}
                 editable={false}
+              />
+            </View>
+          </View>
+          <View style={styles.inputBox}>
+            <View style={{ marginLeft: 10, marginTop: 10 }}>
+              <Text style={styles.text}>occupation</Text>
+              <TextInput
+                keyboardType="email-address"
+                style={[styles.textIp, { marginLeft: -10 }]}
+                value={occupation}
+                onChangeText={(name) => setOccupation(name)}
+              />
+            </View>
+          </View>
+          <View style={styles.inputBox}>
+            <View style={{ marginLeft: 10, marginTop: 10 }}>
+              <Text style={styles.text}>About Me</Text>
+              <TextInput
+                keyboardType="email-address"
+                style={[styles.textIp, { marginLeft: -10 }]}
+                value={bio}
+                multiline={true}
+                onChangeText={(name) => setBio(name)}
               />
             </View>
           </View>

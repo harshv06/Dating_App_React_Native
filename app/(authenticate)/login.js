@@ -11,6 +11,7 @@ import {
   Pressable,
   Animated,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -28,17 +29,19 @@ const Login = () => {
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
-        const token = await AsyncStorage.getItem("auth");
+        const token = await AsyncStorage.getItem("token");
         const profile = await AsyncStorage.getItem("profile");
-        if (token && profile) {
-          router.push("/(tabs)/bio");
+        console.log(token,profile)
+        if (token && profile==='true') {
+          router.replace("/(tabs)/bio");
+          return
         }
       } catch (err) {
         console.log(err);
       }
     };
 
-    checkLoginStatus()
+    checkLoginStatus();
   }, []);
 
   const handleLogin = () => {
@@ -52,7 +55,7 @@ const Login = () => {
     }
 
     try {
-      setModalVisible(true);
+
       fetch("http://192.168.0.105:3000/login", {
         method: "POST",
         headers: {
@@ -62,22 +65,29 @@ const Login = () => {
       })
         .then((res) => res.json())
         .then((response) => {
+          if (response.error) {
+            Alert.alert("Failed", "Invalid Credentials", [{ text: "Ok" }]);
+            return
+          }
+          setModalVisible(true);
           if (response.token && response.profileGenerated) {
+            console.log("hi")
             const token = response.token;
-            AsyncStorage.setItem("auth", token);
-            AsyncStorage.setItem("profile", true);
+            AsyncStorage.setItem("token", token);
+            AsyncStorage.setItem("profile", "true");
             setModalVisible(false);
             setTimeout(() => {
               router.push("/(tabs)/bio");
             }, 2000);
           } else {
+            console.log("heelo")
             const token = response.token;
             AsyncStorage.setItem("auth", token);
-            AsyncStorage.setItem("profile", false);
+            AsyncStorage.setItem("email",email)
             setModalVisible(false);
             setTimeout(() => {
               router.push("/(authenticate)/profileDetails");
-            }, 2000);
+            }, 1000);
           }
         });
     } catch (err) {

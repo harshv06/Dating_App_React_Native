@@ -33,6 +33,18 @@ const userSchema = new mongoose.Schema({
     type: String,
     unique: true,
   },
+  
+  age:{
+    type:Number
+  },
+
+  occupation:{
+    type:String
+  },
+
+  bio:{
+    type:String
+  },
 
   matches: {
     type:[mongoose.Schema.Types.ObjectId]
@@ -45,21 +57,6 @@ const userSchema = new mongoose.Schema({
     },
   ],
 
-  description: {
-    type: String,
-  },
-
-  turnOns: [
-    {
-      type: String,
-    },
-  ],
-
-  lookingFor: [
-    {
-      type: String,
-    },
-  ],
 
   profileGenerated:{
     type:Boolean,
@@ -83,10 +80,6 @@ const userSchema = new mongoose.Schema({
   },
 
   fcmToken: String, // Add this field to store FCM token
-
-  age:{
-    type:Number
-  }
 });
 
 const User = mongoose.model("User", userSchema);

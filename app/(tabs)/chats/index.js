@@ -14,10 +14,12 @@ import { useFocusEffect } from "@react-navigation/native";
 
 const Index = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [tab, setTab] = useState(false);
+  const [tab, setTab] = useState(true);
   const email = "harshvonmail@gmail.com";
   const [pendingLikes, setPendingLikes] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [MSGprofiles, setMSGprofiles] = useState([]);
+  const [list, setList] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,14 +31,21 @@ const Index = () => {
   }, [fadeAnim]);
 
   useEffect(() => {
+    console.log("working: ", list);
+    if (list.length > 0) {
+      fetchMessageProfiles(list);
+    }
+  }, [list]);
+
+  useEffect(() => {
     if (pendingLikes.length > 0) {
       console.log("Pending Likes: ", pendingLikes);
       fetchLikedProfileInfo(pendingLikes);
     }
   }, [pendingLikes]);
 
-  const fetchLikedProfileInfo = async () => {
-    if (pendingLikes) {
+  const fetchMessageProfiles = async (likes) => {
+    if (likes && likes.length > 0) {
       const response = await fetch(
         "http://192.168.0.105:3000/fetchLikedProfilesInfo",
         {
@@ -44,7 +53,33 @@ const Index = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ id: pendingLikes }),
+          body: JSON.stringify({ id: likes }),
+        }
+      );
+      const result = await response.json();
+      if (result.profile) {
+        const updatedProfiles = result.profile.map((img) => ({
+          ...img,
+          profileImages: img.profileImages.map((path) =>
+            path.replace(/\\/g, "/")
+          ),
+        }));
+        setMSGprofiles(updatedProfiles);
+        console.log(updatedProfiles);
+      }
+    }
+  };
+
+  const fetchLikedProfileInfo = async (likes) => {
+    if (likes && likes.length > 0) {
+      const response = await fetch(
+        "http://192.168.0.105:3000/fetchLikedProfilesInfo",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ id: likes }),
         }
       );
       const result = await response.json();
@@ -73,9 +108,10 @@ const Index = () => {
             body: JSON.stringify({ email: email }),
           });
           const result = await response.json();
-          if (result.pendingLikes.length==0) {
+          console.log(result.pendingLikes);
+          if (!result.pendingLikes || result.pendingLikes.length === 0) {
             console.log("No profiles to show");
-            setProfiles(null)
+            setProfiles([]);
           } else {
             setPendingLikes(result.pendingLikes);
             console.log(result.pendingLikes.length);
@@ -86,13 +122,44 @@ const Index = () => {
       };
 
       fetchLikes();
-      console.log("Done");
     }, [])
   );
 
-  const renderCards = () => {
-    if (profiles.length > 0) {
-      return profiles.map((profile, index) => (
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchMessages = async () => {
+        try {
+          const response = await fetch(
+            "http://192.168.0.105:3000/fetchMessageList",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email: email }),
+            }
+          );
+          const result = await response.json();
+          if (result.list && result.list.length > 0) {
+            console.log("List:", result.list);
+            setList(result.list);
+          } else {
+            console.log("No messages found");
+            setList([]);
+          }
+        } catch (err) {
+          console.log(err);
+        }
+      };
+
+      fetchMessages();
+    }, [])
+  );
+
+  const renderCards = (message) => {
+    const profilesToRender = message === "message" ? MSGprofiles : profiles;
+    if (profilesToRender.message === "message" && profilesToRender.length > 0) {
+      return profilesToRender.map((profile, index) => (
         <Pressable
           key={index}
           style={styles.card}
@@ -113,15 +180,48 @@ const Index = () => {
           />
           <View style={styles.pressable}>
             <Text style={styles.cardText}>{profile.name}</Text>
-            <Text style={styles.cardText2}>Message</Text>
+            <Text style={styles.cardText2}>
+              {message === "message" ? "Message" : "Match"}
+            </Text>
           </View>
         </Pressable>
       ));
-    } else {
-      return <Text>No profiles found</Text>;
+    }
+
+    if (profilesToRender && profilesToRender.length > 0) {
+      {
+        return profilesToRender.map((profile, index) => (
+          <Pressable
+            key={index}
+            style={styles.card}
+            onPress={() => {
+              console.log(profile._id);
+              router.push(
+                `/(tabs)/chats/profileInfo/?id=${encodeURIComponent(
+                  profile._id
+                )}`
+              );
+            }}
+          >
+            <Image
+              uri={`http://192.168.0.105:3000/${profile.profileImages[0]}`}
+              style={styles.image}
+              resizeMode="contain"
+              placeholderContent={
+                <ActivityIndicator size="small" color="#0000ff" />
+              }
+            />
+            <View style={styles.pressable}>
+              <Text style={styles.cardText}>{profile.name}</Text>
+              <Text style={styles.cardText2}>
+                {message === "message" ? "Message" : "Match"}
+              </Text>
+            </View>
+          </Pressable>
+        ));
+      }
     }
   };
-  
 
   return (
     <Animated.View style={{ flex: 1, opacity: fadeAnim }}>
@@ -149,15 +249,19 @@ const Index = () => {
         </View>
 
         {tab ? (
-          <View>
-            <Text>ho</Text>
-          </View>
+          <>
+            {list.length > 0 ? (
+              <View>{renderCards("message")}</View>
+            ) : (
+              <Text>No messages</Text>
+            )}
+          </>
         ) : (
           <>
-            {profiles ? (
-              <View style={{ marginTop: 0 }}>{renderCards()}</View>
+            {profiles.length > 0 ? (
+              <View style={{ marginTop: 0 }}>{renderCards("match")}</View>
             ) : (
-              <Text>nothing</Text>
+              <Text>Nothing to show here</Text>
             )}
           </>
         )}

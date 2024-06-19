@@ -18,6 +18,7 @@ import { MaterialIcons, Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -69,6 +70,10 @@ const Register = () => {
               },
             },
           ]);
+        }else{
+          Alert.alert("Failed","Please Try Again")
+          setModalVisible(false)
+          return
         }
         setModalVisible(false)
         // Alert.alert("Failed",response.error)

@@ -11,16 +11,21 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "core-js/stable/atob";
-import { jwtDecode } from "jwt-decode";
 import { router, useLocalSearchParams } from "expo-router";
 import { Foundation } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
 const SelectGender = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  const { email } = useLocalSearchParams();
+  const [email,setEmail]=useState("")
   useEffect(() => {
+    const fetchData=async()=>{
+      const mail=await AsyncStorage.getItem("email")
+      if(mail){
+        setEmail(mail)
+      }
+    }
+    fetchData()
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
@@ -29,6 +34,7 @@ const SelectGender = () => {
   }, [fadeAnim]);
 
   const updateGender = async () => {
+    console.log("Here")
     try {
       fetch(`http://192.168.0.105:3000/users/gender`, {
         method: "PUT",
@@ -39,8 +45,10 @@ const SelectGender = () => {
       })
         .then((res) => res.json())
         .then((response) => {
+          console.log(response)
+          AsyncStorage.setItem("gender",option)
           if (response.message) {
-            router.replace(`/selectInrests/?email=${email}`);
+            router.replace(`/selectInrests`);
           }
         });
     } catch (err) {
@@ -48,7 +56,6 @@ const SelectGender = () => {
     }
   };
 
-  const [userID, setUserID] = useState("");
   const [option, setOption] = useState("");
 
   return (
