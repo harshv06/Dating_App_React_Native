@@ -127,6 +127,7 @@ const Index = () => {
           }));
           setProfiles(formattedProfiles);
           setCurrentIndex(0); // Reset current index when profiles are updated
+          console.log(profiles)
         }
       } catch (error) {
         console.error("Error fetching profiles:", error);

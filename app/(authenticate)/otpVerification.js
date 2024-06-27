@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import OTPInputView from "@twotalltotems/react-native-otp-input";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useRoute } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
 const OtpVerification = () => {
@@ -22,7 +21,6 @@ const OtpVerification = () => {
   const [isVerificationComplete, setIsVerificationComplete] = useState(false);
   const [enteredCode, setCode] = useState(false);
   const router = useRouter();
-  const route = useRoute();
   const [counter, setCounter] = useState(30);
   const [isCounting, setIsCounting] = useState(true);
   useEffect(() => {

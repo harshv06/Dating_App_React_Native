@@ -238,7 +238,7 @@ router.post("/handleLike", async (req, res) => {
   } else {
     try {
       if (!user.Likes.includes(id) && !user2.pendingLikes.includes(user._id)) {
-        // user.Likes.push(id);
+        user.Likes.push(id);
         user2.pendingLikes.push(user._id);
         console.log(user2);
         await user.save();

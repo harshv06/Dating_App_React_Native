@@ -14,7 +14,7 @@ import { useFocusEffect } from "@react-navigation/native";
 
 const Index = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [tab, setTab] = useState(true);
+  const [tab, setTab] = useState(false);
   const email = "harshvonmail@gmail.com";
   const [pendingLikes, setPendingLikes] = useState([]);
   const [profiles, setProfiles] = useState([]);
